@@ -21,6 +21,7 @@ func init() {
 			"aws_internet_gateway",
 			"aws_nat_gateway",
 			"aws_network_acl",
+			"aws_route_table",
 			"aws_security_group",
 			"aws_subnet",
 			"aws_vpn_gateway",
@@ -42,6 +43,7 @@ func testSweepVPCs(region string) error {
 				Name: aws.String("tag-value"),
 				Values: []*string{
 					aws.String("terraform-testacc-*"),
+					aws.String("tf-acc-test-*"),
 				},
 			},
 		},
@@ -84,6 +86,27 @@ func testSweepVPCs(region string) error {
 	}
 
 	return nil
+}
+
+func TestAccAWSVpc_importBasic(t *testing.T) {
+	resourceName := "aws_vpc.foo"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckVpcDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcConfig,
+			},
+
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func TestAccAWSVpc_basic(t *testing.T) {
